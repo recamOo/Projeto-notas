@@ -3,19 +3,19 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const FILE = 'data.json';
 
 // Permite receber JSON
 app.use(bodyParser.json());
 
-// Serve arquivos estáticos (HTML, CSS, JS)
-app.use(express.static('.'));
-
 // Libera acesso externo (CORS)
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    next();
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
 });
 
 // Função para ler arquivo
@@ -32,6 +32,10 @@ function readNotes() {
 function saveNotes(notes) {
     fs.writeFileSync (FILE, JSON.stringify(notes, null, 2));
 }
+
+app.get('/', (req, res) => {
+  res.redirect('/api/notes'); // ou: res.send('API de notas rodando');
+});
 
 // GET - Listar notas
 app.get('/api/notes' , (req, res) => {
@@ -83,5 +87,5 @@ app.delete('/api/notes/:id', (req, res) => {
 
 // Inicia servidor
 app.listen(PORT, () => {
-    console.log('Servidor rodando em http://localhost:3000');
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
